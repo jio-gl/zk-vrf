@@ -1,0 +1,44 @@
+{
+  "name": "zk-vrf",
+  "version": "0.1.0",
+  "description": "ZK-VRF with EdDSA in zk-SNARK implementation",
+  "main": "index.js",
+  "scripts": {
+    "compile": "node scripts/compile_circuit.js",
+    "test": "forge test",
+    "coverage": "forge coverage",
+    "deploy": "hardhat run scripts/deploy.js",
+    "setup": "npx snarkjs powersoftau new bn128 12 pot12_0000.ptau && npx snarkjs powersoftau contribute pot12_0000.ptau pot12_0001.ptau --name='First contribution' -v",
+    "prove": "snarkjs groth16 prove build/vrf.zkey witness.wtns proof.json public.json",
+    "verify": "snarkjs groth16 verify verification_key.json public.json proof.json",
+    "preinstall": "test -f $HOME/.cargo/bin/cargo || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh",
+    "postinstall": "npm run build-circom",
+    "build-circom": "cargo install --git https://github.com/iden3/circom.git --tag v2.1.7",
+    "prepare": "cd node_modules/circomlib/ && npm install"
+  },
+  "dependencies": {
+    "circomlib": "^2.0.3",
+    "circomlibjs": "^0.1.7",
+    "snarkjs": "^0.6.11"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3",
+    "chai": "^4.3.7",
+    "eslint": "^8.56.0",
+    "hardhat": "^2.19.1",
+    "mocha": "^10.2.0"
+  },
+  "keywords": [
+    "zksnark",
+    "vrf",
+    "cryptography",
+    "blockchain"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  }
+}
