@@ -19,6 +19,16 @@ This project implements a Verifiable Random Function (VRF) using EdDSA signature
 - 🧪 Comprehensive test coverage
 - 📊 Gas optimization and constraint profiling
 
+## Design & Benefits
+
+The ZK-VRF system combines EdDSA signatures with zk-SNARKs to create a verifiable random function that is both secure and efficient:
+
+- **Privacy**: The VRF output is generated without revealing the private key or the randomness source
+- **Verifiability**: Anyone can verify that the output was generated correctly using the public key
+- **Uniqueness**: Each input produces a unique, deterministic output
+- **Gas Efficiency**: zk-SNARKs provide compact proofs that are cheap to verify on-chain
+- **Composability**: The system can be integrated with other ZK protocols and smart contracts
+
 ## Installation
 
 1. Install Foundry:
