@@ -131,7 +131,6 @@ The project uses:
 Security considerations:
 - Proper ZKP trusted setup ceremony
 - Private key management
-- Nullifier set maintenance
 
 ## License
 
