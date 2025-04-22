@@ -68,14 +68,16 @@ function scalarToBits(s) {
 
 function numberToBits(n, length) {
     const bits = [];
-    let value = BigInt(n);
+    const value = typeof n === 'bigint' ? n : BigInt(n.toString());
     
     for (let i = 0; i < length; i++) {
-        bits.push(Number(value & 1n));
-        value = value >> 1n;
+        // Work from most significant bit to least
+        const bitPosition = BigInt(length - 1 - i);
+        const mask = 1n << bitPosition;
+        bits.push(Number((value & mask) ? 1n : 0n));
     }
     
-    return bits.reverse(); // Reverse to get big-endian bit order
+    return bits;
 }
 
 async function main() {
@@ -87,7 +89,7 @@ async function main() {
     // Generate message (10 bytes = 80 bits)
     const msg = BigInt(123);
     const ctx = BigInt(456);
-    const msgHash = poseidon([msg, ctx]);
+    const msgHash = poseidon.F.toString(poseidon([msg, ctx]));
     const msgBits = numberToBits(msgHash, 80);
     console.log("Message bits length:", msgBits.length);
     
