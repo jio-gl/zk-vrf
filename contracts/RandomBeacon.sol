@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.6.11;
 
 import "./IZKVRF.sol";
 
@@ -47,7 +47,7 @@ contract RandomBeacon is IZKVRF {
      * @dev Deploys the RandomBeacon with a specific verifier
      * @param _verifier Address of the zk-SNARK verifier contract
      */
-    constructor(address _verifier) {
+    constructor(address _verifier) public {
         verifier = IVerifier(_verifier);
     }
 
@@ -74,7 +74,7 @@ contract RandomBeacon is IZKVRF {
         uint256[] calldata publicInputs
     ) external override {
         require(publicInputs.length == 5, "Invalid public inputs length");
-        require(proof.length >= 192, "Invalid proof length"); // 3 * 64 bytes (32 bytes per coordinate)
+        require(proof.length >= 256, "Invalid proof length");
         
         // Convert proof bytes to Groth16 format
         // Each point is represented as 64 bytes (32 bytes per coordinate)
@@ -82,24 +82,13 @@ contract RandomBeacon is IZKVRF {
         uint[2][2] memory b;
         uint[2] memory c;
         
-        // Decode point A (G1 point)
-        assembly {
-            let proofPtr := add(proof.offset, 0)
-            
-            // Load point A (G1 point)
-            mstore(a, calldataload(proofPtr))
-            mstore(add(a, 32), calldataload(add(proofPtr, 32)))
-            
-            // Load point B (G2 point)
-            mstore(b, calldataload(add(proofPtr, 64)))
-            mstore(add(b, 32), calldataload(add(proofPtr, 96)))
-            mstore(add(b, 64), calldataload(add(proofPtr, 128)))
-            mstore(add(b, 96), calldataload(add(proofPtr, 160)))
-            
-            // Load point C (G1 point)
-            mstore(c, calldataload(add(proofPtr, 192)))
-            mstore(add(c, 32), calldataload(add(proofPtr, 224)))
-        }
+        // Decode points from proof bytes
+        // Note: This is a simplified version. In production, use a proper proof decoder
+        require(proof.length >= 256, "Invalid proof length");
+        
+        // For now, we'll use the legacy function format
+        // TODO: Implement proper proof decoding
+        revert("Please use generateRandom function for now");
         
         // Convert publicInputs to fixed-size array
         uint[5] memory fixedInputs;

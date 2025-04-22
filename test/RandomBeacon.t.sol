@@ -1,74 +1,54 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.6.11;
 
-import "forge-std/Test.sol";
 import "../contracts/RandomBeacon.sol";
 import "../contracts/Verifier.sol";
 
-contract RandomBeaconTest is Test {
+contract RandomBeaconTest {
     RandomBeacon beacon;
     Verifier verifier;
     
-    // Test data will be loaded from proof.json and public.json
-    struct Proof {
-        uint[2] a;
-        uint[2][2] b;
-        uint[2] c;
-    }
-    
-    struct PublicInputs {
-        uint[5] inputs;
-    }
-    
-    function setUp() public {
+    constructor() public {
         // Deploy the verifier contract directly
         verifier = new Verifier();
         beacon = new RandomBeacon(address(verifier));
     }
     
+    // TODO: Replace with actual proof data from the circuit
     function testRandomGeneration() public {
-        // Load proof and public inputs from files
-        string memory proofJson = vm.readFile("proof.json");
-        string memory publicJson = vm.readFile("public.json");
-        
-        Proof memory proof = abi.decode(vm.parseJson(proofJson), (Proof));
-        PublicInputs memory publicInputs = abi.decode(vm.parseJson(publicJson), (PublicInputs));
+        // IMPORTANT: This test will fail until real proof data is provided
+        // The following values are placeholders and will not pass verification
+        uint[2] memory a = [uint(1), 2];
+        uint[2][2] memory b = [[uint(3), 4], [uint(5), 6]];
+        uint[2] memory c = [uint(7), 8];
+        uint[5] memory inputs = [uint(9), 10, 11, 12, 13];
         
         // Generate random number using the proof
-        bytes32 result = beacon.generateRandom(
-            proof.a,
-            proof.b,
-            proof.c,
-            publicInputs.inputs
-        );
+        bytes32 result = beacon.generateRandom(a, b, c, inputs);
         
         // Verify the result matches the VRF output from public inputs
-        assertEq(result, bytes32(publicInputs.inputs[3]), "VRF output mismatch");
+        require(result == bytes32(inputs[3]), "VRF output mismatch");
     }
     
+    // TODO: Replace with actual proof data from the circuit
     function testReusedCommitment() public {
-        // Load proof and public inputs
-        string memory proofJson = vm.readFile("proof.json");
-        string memory publicJson = vm.readFile("public.json");
-        
-        Proof memory proof = abi.decode(vm.parseJson(proofJson), (Proof));
-        PublicInputs memory publicInputs = abi.decode(vm.parseJson(publicJson), (PublicInputs));
+        // IMPORTANT: This test will fail until real proof data is provided
+        // The following values are placeholders and will not pass verification
+        uint[2] memory a = [uint(1), 2];
+        uint[2][2] memory b = [[uint(3), 4], [uint(5), 6]];
+        uint[2] memory c = [uint(7), 8];
+        uint[5] memory inputs = [uint(9), 10, 11, 12, 13];
         
         // First call should succeed
-        beacon.generateRandom(
-            proof.a,
-            proof.b,
-            proof.c,
-            publicInputs.inputs
-        );
+        beacon.generateRandom(a, b, c, inputs);
         
         // Second call with same commitment should fail
-        vm.expectRevert("Commitment reused");
-        beacon.generateRandom(
-            proof.a,
-            proof.b,
-            proof.c,
-            publicInputs.inputs
-        );
+        bool failed;
+        try beacon.generateRandom(a, b, c, inputs) {
+            failed = false;
+        } catch {
+            failed = true;
+        }
+        require(failed, "Should revert on reused commitment");
     }
 } 
