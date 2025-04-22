@@ -1,0 +1,10 @@
+{
+  "circuits": [
+    {
+      "name": "vrf",
+      "config": {
+        "include": ["node_modules/circomlib/circuits"]
+      }
+    }
+  ]
+} 

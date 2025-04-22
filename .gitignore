@@ -4,8 +4,9 @@ cache/
 out/
 broadcast/
 */broadcast/*
-lib/
-!/lib/forge-std
+/lib/*
+!/lib/
+!/lib/forge-std/
 
 # Hardhat
 artifacts/

@@ -3,29 +3,72 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "../contracts/RandomBeacon.sol";
+import "../contracts/Verifier.sol";
 
 contract RandomBeaconTest is Test {
     RandomBeacon beacon;
-    address verifier = address(0x1234); // Mock verifier
+    Verifier verifier;
+    
+    // Test data will be loaded from proof.json and public.json
+    struct Proof {
+        uint[2] a;
+        uint[2][2] b;
+        uint[2] c;
+    }
+    
+    struct PublicInputs {
+        uint[5] inputs;
+    }
     
     function setUp() public {
-        beacon = new RandomBeacon(verifier);
+        // Deploy the verifier contract directly
+        verifier = new Verifier();
+        beacon = new RandomBeacon(address(verifier));
     }
     
     function testRandomGeneration() public {
-        // Setup test with mock proof data
-        uint[2] memory a;
-        uint[2][2] memory b;
-        uint[2] memory c;
-        uint[5] memory input;
+        // Load proof and public inputs from files
+        string memory proofJson = vm.readFile("proof.json");
+        string memory publicJson = vm.readFile("public.json");
         
-        vm.mockCall(
-            verifier,
-            abi.encodeWithSelector(IVerifier.verifyProof.selector),
-            abi.encode(true)
+        Proof memory proof = abi.decode(vm.parseJson(proofJson), (Proof));
+        PublicInputs memory publicInputs = abi.decode(vm.parseJson(publicJson), (PublicInputs));
+        
+        // Generate random number using the proof
+        bytes32 result = beacon.generateRandom(
+            proof.a,
+            proof.b,
+            proof.c,
+            publicInputs.inputs
         );
         
-        bytes32 result = beacon.generateRandom(a, b, c, input);
-        // Add assertions based on expected behavior
+        // Verify the result matches the VRF output from public inputs
+        assertEq(result, bytes32(publicInputs.inputs[3]), "VRF output mismatch");
+    }
+    
+    function testReusedCommitment() public {
+        // Load proof and public inputs
+        string memory proofJson = vm.readFile("proof.json");
+        string memory publicJson = vm.readFile("public.json");
+        
+        Proof memory proof = abi.decode(vm.parseJson(proofJson), (Proof));
+        PublicInputs memory publicInputs = abi.decode(vm.parseJson(publicJson), (PublicInputs));
+        
+        // First call should succeed
+        beacon.generateRandom(
+            proof.a,
+            proof.b,
+            proof.c,
+            publicInputs.inputs
+        );
+        
+        // Second call with same commitment should fail
+        vm.expectRevert("Commitment reused");
+        beacon.generateRandom(
+            proof.a,
+            proof.b,
+            proof.c,
+            publicInputs.inputs
+        );
     }
 } 

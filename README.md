@@ -1,9 +1,16 @@
-# ZK-VRF with EdDSA in zk-SNARK
+# ZK-VRF with EdDSA in zk-SNARK (WIP! Not for production)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 [![Foundry](https://img.shields.io/badge/Built%20with-Foundry-FF6943.svg)](https://getfoundry.sh)
 
-A Zero-Knowledge Verifiable Random Function implementation using EdDSA signatures in zk-SNARK circuits.
+This project implements a Verifiable Random Function (VRF) using EdDSA signatures in a zk-SNARK circuit. The implementation uses circom for circuit compilation and Foundry for smart contract testing.
+
+## Prerequisites
+
+- Node.js (v16+)
+- Rust (for circom compilation)
+- Foundry (for smart contract development)
+- circom (built from source)
 
 ## Features
 
@@ -14,33 +21,69 @@ A Zero-Knowledge Verifiable Random Function implementation using EdDSA signature
 
 ## Installation
 
-1. Install dependencies:
+1. Install Foundry:
 ```bash
-npm install
-forge install
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
 ```
 
-2. Install circom & snarkjs:
+2. Install circom from source:
 ```bash
-npm install -g circom snarkjs
+# Install Rust if you haven't already
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Clone and build circom
+git clone https://github.com/iden3/circom.git
+cd circom
+cargo build --release
+cargo install --path circom
+cd ..
 ```
+
+3. Install project dependencies:
+```bash
+npm install
+```
+
+## Project Structure
+
+- `circuits/`: Contains the circom circuit implementation
+- `contracts/`: Contains the Solidity smart contracts
+- `test/`: Contains the test files
+- `scripts/`: Contains utility scripts for compilation and deployment
 
 ## Usage
 
 1. Compile the circuit:
 ```bash
-circom circuits/vrf.circom --r1cs --wasm --sym
+npm run compile
 ```
 
-2. Generate proofs:
+2. Run tests:
 ```bash
-snarkjs groth16 setup vrf.r1cs pot12_final.ptau circuit.zkey
+npm run test
 ```
 
-3. Run tests:
+3. Generate and verify proofs:
 ```bash
-forge test
+# Generate proof
+npm run prove
+
+# Verify proof
+npm run verify
 ```
+
+4. Deploy contracts:
+```bash
+npm run deploy
+```
+
+## Development
+
+The project uses:
+- circom v2.1.7 for circuit compilation
+- Foundry for smart contract development and testing
+- Hardhat for deployment
 
 ## Security
 
@@ -53,4 +96,4 @@ Security considerations:
 
 ## License
 
-MIT 
+Apache 2.0 

@@ -1,50 +1,49 @@
-pragma circom 2.1.0;
+pragma circom 2.1.4;
 
-include "node_modules/circomlib/circuits/eddsa.circom";
-include "node_modules/circomlib/circuits/poseidon.circom";
+include "../node_modules/circomlib/circuits/poseidon.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
+include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 
 template VRF() {
     // Public inputs
-    signal input pk[2];
-    signal input M;
-    signal input ctx;
-    signal input vrf_out;
-    signal input comm;
+    signal input Ax;          // Public key x coordinate
+    signal input Ay;          // Public key y coordinate
+    signal input R8x;         // R8 point x coordinate
+    signal input R8y;         // R8 point y coordinate
+    signal input S;           // Signature scalar
+    signal input M;           // Message as field element
+
+    // Outputs
+    signal output out[254];   // VRF output in bits
+
+    // EdDSA Poseidon verifier component
+    component verifier = EdDSAPoseidonVerifier();
     
-    // Private inputs
-    signal input sk;
-    signal input R[2];
-    signal input S;
-    
-    // EdDSA verification
-    component verifier = EdDSAMiMCVerifier();
+    // Connect inputs to verifier
     verifier.enabled <== 1;
-    verifier.Ax <== pk[0];
-    verifier.Ay <== pk[1];
-    verifier.R8x <== R[0];
-    verifier.R8y <== R[1];
+    verifier.Ax <== Ax;
+    verifier.Ay <== Ay;
+    verifier.R8x <== R8x;
+    verifier.R8y <== R8y;
     verifier.S <== S;
-    verifier.M <== M + ctx; // M' = M || ctx
+    verifier.M <== M;
+
+    // Calculate VRF output using Poseidon hash
+    component poseidon = Poseidon(3);
     
-    // VRF output calculation
-    component hash = Poseidon(3);
-    hash.inputs[0] <== R[0];
-    hash.inputs[1] <== R[1];
-    hash.inputs[2] <== S;
-    vrf_out <== hash.out;
+    // Hash R8x and S together
+    poseidon.inputs[0] <== R8x;  // Use x-coordinate
+    poseidon.inputs[1] <== S;
+    poseidon.inputs[2] <== 0;  // Padding
     
-    // Commitment
-    component commHash = Poseidon(2);
-    commHash.inputs[0] <== vrf_out;
-    commHash.inputs[1] <== ctx;
-    comm <== commHash.out;
+    // Convert hash output to bits
+    component num2bits = Num2Bits(254);
+    num2bits.in <== poseidon.out;
     
-    // Public key consistency
-    component pkVerifier = EdDSAMiMCKeyVerifier();
-    pkVerifier.enabled <== 1;
-    pkVerifier.Ax <== pk[0];
-    pkVerifier.Ay <== pk[1];
-    pkVerifier.S <== sk;
+    // Set outputs
+    for (var i = 0; i < 254; i++) {
+        out[i] <== num2bits.out[i];
+    }
 }
 
 component main = VRF(); 
