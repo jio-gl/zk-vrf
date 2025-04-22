@@ -1,4 +1,4 @@
-# ZK-VRF with EdDSA in zk-SNARK (WIP!)
+# ZK-VRF with EdDSA in zk-SNARK (⚠️WIP!)
 
 
 [![Foundry](https://img.shields.io/badge/Built%20with-Foundry-FF6943.svg)](https://getfoundry.sh)
